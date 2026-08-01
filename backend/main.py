@@ -151,7 +151,12 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=502, detail=f"Gemini API error: {exc}")
 
     sources = [
-        {"filename": c["source"], "chunk_index": c["chunk_index"], "relevance": round(c["score"], 3)}
+        {
+            "filename": c["source"],
+            "chunk_index": c["chunk_index"],
+            "relevance": round(c["score"], 3),
+            "preview": c["text"][:200].replace("\n", " ").strip() + ("…" if len(c["text"]) > 200 else ""),
+        }
         for c in retrieved
     ]
     return ChatResponse(answer=answer, sources=sources)
