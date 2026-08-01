@@ -82,25 +82,3 @@ All configuration lives in `backend/.env`:
 Chunking and retrieval parameters (`CHUNK_SIZE`, `CHUNK_OVERLAP`, `TOP_K`) are
 constants at the top of `rag_engine.py`.
 
-## API reference
-
-| Method | Endpoint                    | Description                          |
-|--------|------------------------------|---------------------------------------|
-| POST   | `/api/upload`                | Ingest a PDF into the knowledge base |
-| GET    | `/api/documents`             | List ingested documents + chunk counts |
-| DELETE | `/api/documents/{filename}`  | Remove a document                    |
-| POST   | `/api/chat`                  | Ask a question (`{message, history}`) |
-| GET    | `/api/health`                | Liveness check                       |
-
-## Notes for adapting this for a client
-
-- **Swap the embedding model** in `rag_engine.py` (`EMBEDDING_MODEL_NAME`) for
-  a larger `sentence-transformers` model if retrieval quality needs to
-  improve, at the cost of speed.
-- **Swap ChromaDB** for a managed vector database (Pinecone, Qdrant Cloud,
-  pgvector) by replacing the `VectorStore` class — the rest of the app is
-  unaware of the storage backend.
-- **Access control**: this reference implementation has no authentication.
-  Add it at the FastAPI layer before exposing this beyond a local demo.
-- **Multi-tenant knowledge bases**: partition by adding a `tenant_id` field to
-  chunk metadata and filtering queries by it.
