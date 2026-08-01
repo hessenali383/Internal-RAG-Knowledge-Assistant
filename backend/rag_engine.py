@@ -143,16 +143,18 @@ class VectorStore:
         )
 
     def add_document(self, filename: str, text: str) -> int:
-        """Chunk a document's text and upsert it into the vector store."""
+        """Chunk a document's text and upsert it into the vector store.
+
+        Re-ingesting a filename that's already indexed replaces its old
+        chunks instead of adding a second copy alongside them.
+        """
         chunks = chunk_text(text)
         if not chunks:
             raise ValueError("Document produced no usable chunks.")
 
-        ids = [f"{filename}::{i}::{uuid.uuid4().hex[:8]}" for i in range(len(chunks))]
-        metadatas = [{"source": filename, "chunk_index": i} for i in range(len(chunks))]
+        self.delete_document(filename)  # clear any previous version first
 
-        self._collection.add(ids=ids, documents=chunks, metadatas=metadatas)
-        return len(chunks)
+        ids = [f"{filename}::{i}::{uuid.uuid4().hex[:8]}" for i in range(len(chunks))]
 
     def query(self, question: str, top_k: int = TOP_K) -> List[Dict[str, Any]]:
         if self._collection.count() == 0:
